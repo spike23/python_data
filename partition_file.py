@@ -1,8 +1,12 @@
 import os
 
-splitlen = 10
-list_of_file = [1, 2, 3]
-file_path = 'C:\\Users\\admin\Downloads\\'
+
+file_path = "C:\\Users\\admin\\Downloads\\temp\\"
+folder = os.listdir(file_path)
+filter_of_files = filter(lambda x: x.endswith('.txt'), folder)
+list_of_file = []
+for file in filter_of_files:
+    list_of_file.append(file)
 
 
 def partition_file(splitlen, list_of_file):
@@ -11,7 +15,7 @@ def partition_file(splitlen, list_of_file):
     try:
         quontity = 0
         for file in list_of_file:
-            with open(file_path + '{0}.txt'.format(file), 'r') as input:
+            with open(file_path + '{0}'.format(file), 'r') as input:
                 output_name = 'copy_file_{0}_'.format(file)
                 count = 0
                 at = 0
@@ -42,7 +46,7 @@ def partition_file_version_2(splitlen, list_of_file):
         count = 0
         quontity = 0
         for file in list_of_file:
-            with open(file_path + '{0}.txt'.format(file), 'r') as input:
+            with open(file_path + '{0}'.format(file), 'r') as input:
                 for n, line in enumerate(input):
                     if count % splitlen == 0:
                         if dest:
@@ -63,4 +67,4 @@ def partition_file_version_2(splitlen, list_of_file):
 
 if __name__ == "__main__":
     partition_file(splitlen, list_of_file)
-
+    #  partition_file_version_2(splitlen, list_of_file)
