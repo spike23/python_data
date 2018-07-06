@@ -1,5 +1,6 @@
 import paramiko
 import os
+import sys
 
 local_path = 'C:\\Users\\guest\\folder\\'
 remote_path = 'C:\\Users\\admin\\Downloads\\'
@@ -22,9 +23,9 @@ def send_to_sftp(host_sftp, port, username_sftp, password_sftp, local_filepath, 
         sftp.close()
         transport.close()
         print ('Upload from {0} to {1}was done.'.format(local_filepath, remote_filepath))
-    except BaseException:
+    except Exception:
         print('Transfer from {0} to {1}was interrupt'.format(local_filepath, remote_filepath))
-        raise
+        print(sys.exc_info()[1])
 
 
 if __name__ == "__main__":

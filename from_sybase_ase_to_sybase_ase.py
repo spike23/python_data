@@ -1,4 +1,5 @@
 import pymssql
+import sys
 import re
 from contextlib import closing
 
@@ -28,9 +29,9 @@ def get_column_types(server, user, password, mssql_table_from):
                 connect.commit()
                 connect.close()
                 return cols_types
-    except BaseException:
+    except Exception:
         print("Error while getting column types.")
-        raise
+        print(sys.exc_info()[1])
 
 
 def get_rows(mssql_table_from, column):
@@ -59,9 +60,9 @@ def get_rows(mssql_table_from, column):
             print('%s', rows)
             print('%s', cols_types)
             return rows
-    except BaseException:
+    except Exception:
         print("Error while getting rows.")
-        raise
+        print(sys.exc_info()[1])
 
 
 def get_data_type(type_name):
@@ -119,9 +120,9 @@ def bulk_insert_rows(mssql_table_to, rows, cols_types, commit_every=5000):
                 print('[%s] inserted %s rows', mssql_table_to, row_count)
                 cursor.close()
                 connect.close()
-    except BaseException:
+    except Exception:
         print("Error while inserting.")
-        raise
+        print(sys.exc_info()[1])
 
 
 if __name__ == "__main__":

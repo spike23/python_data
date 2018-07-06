@@ -2,6 +2,7 @@ import os
 import pyodbc
 import zipfile
 import csv
+import sys
 from contextlib import closing
 
 driver = '{SQL Server}'
@@ -38,9 +39,9 @@ def from_iq_to_csv(driver, server, user, password, delimiter, local_filepath):
                 arch.write(local_filepath, os.path.basename(local_filepath))
                 os.remove(local_filepath)
 
-    except BaseException:
+    except Exception:
         print(" Error while writing from database to csv")
-        raise
+        print(sys.exc_info()[1])
 
 
 def chunks(cur):

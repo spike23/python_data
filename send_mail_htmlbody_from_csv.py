@@ -1,5 +1,6 @@
 import smtplib
 import os
+import sys
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 
@@ -24,9 +25,9 @@ def csv_reader(filepath):
             res += "</tbody></table>"
             html_file.writelines(res)
             return res
-    except BaseException:
+    except Exception:
         print("Error while creating html file from csv.")
-        raise
+        print(sys.exc_info()[1])
 
 
 def send_mail(server, port, user, password, res):
@@ -56,9 +57,9 @@ def send_mail(server, port, user, password, res):
             # Отправка письма
             s.sendmail(me, toaddr, msg.as_string())
             s.quit()
-    except BaseException:
+    except Exception:
         print("Error while sending mail.")
-        raise
+        print(sys.exc_info()[1])
 
 
 if __name__ == "__main__":

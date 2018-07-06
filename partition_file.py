@@ -1,10 +1,12 @@
 import os
+import sys
 
 
 file_path = "C:\\Users\\admin\\Downloads\\temp\\"
 folder = os.listdir(file_path)
 filter_of_files = filter(lambda x: x.endswith('.txt'), folder)
 list_of_file = []
+splitlen = 100
 for file in filter_of_files:
     list_of_file.append(file)
 
@@ -32,9 +34,9 @@ def partition_file(splitlen, list_of_file):
                 print(str(count) + " strings in file were writing")
         print(str(quontity) + " files were writing")
 
-    except BaseException:
+    except Exception:
         print("Error while partitioning")
-        raise
+        print(sys.exc_info()[1])
 
 
 def partition_file_version_2(splitlen, list_of_file):
@@ -60,9 +62,9 @@ def partition_file_version_2(splitlen, list_of_file):
         print(str(count) + " strings in file were writing")
         if dest:
             dest.close()
-    except BaseException:
+    except Exception:
         print("Error while partitioning")
-        raise
+        print(sys.exc_info()[1])
 
 
 if __name__ == "__main__":

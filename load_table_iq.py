@@ -1,5 +1,6 @@
 import pyodbc
 import os
+import sys
 from contextlib import closing
 
 driver = '{SQL Server}'
@@ -36,9 +37,9 @@ def load_table_iq(driver, server, user, password, schema, tablename, delimiter, 
                             file_path=remote_filepath)
             cursor.execute(prepared_stm)
             conn.commit()
-    except BaseException:
+    except Exception:
         print('Load table {0} ERROR:'.format(tablename))
-        raise
+        print(sys.exc_info()[1])
 
 
 if __name__ == "__main__":

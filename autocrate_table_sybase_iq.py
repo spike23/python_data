@@ -1,4 +1,5 @@
 import pyodbc
+import sys
 from contextlib import closing
 
 driver = '{SQL Server}'
@@ -59,9 +60,10 @@ def autocreate_table_iq(driver, server, user, password, schema, tablename, field
 
             cursor.execute(sql)
             conn.commit()
-    except BaseException:
+    except Exception:
         print('Creating table {0} ERROR:'.format(tablename))
-        raise
+        print(sys.exc_info()[1])
+        
 
 
 if __name__ == "__main__":
