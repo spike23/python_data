@@ -5,14 +5,14 @@ import csv
 
 local_path = 'C:\\Users\\admin\\Downloads\\'
 filename = 'test_file.csv'
-local_filepath = os.path.join(local_path,filename)
+local_filepath = os.path.join(local_path, filename)
 delimiter = '|'
 with_header = True
 table = 'airflow_table'
 
 field_types = [{'columnName': 'a', 'columnType': 'VARCHAR2 (10)'},
-                   {'columnName': 'b', 'columnType': 'VARCHAR2 (10)'},
-                   {'columnName': 'c', 'columnType': 'number (10)'},
+               {'columnName': 'b', 'columnType': 'VARCHAR2 (10)'},
+               {'columnName': 'c', 'columnType': 'number (10)'},
                ]
 
 my_connection = {
@@ -32,33 +32,38 @@ column_names_with_header = next(reader)
 column_names_without_header = [field.get('columnName', 'unknown') for field in field_types]
 
 
-def bulk_insert_rows(table, rows, target_fields, commit_every=5000):
-    conn_str = '{user}/{password}@{host}:{port}/{service}'.format(**my_connection)
-    conn = cx_Oracle.connect(conn_str)
-    cursor = conn.cursor()
-    values = ', '.join(':%s' % i for i in range(1, len(target_fields) + 1))
-    prepared_stm = 'insert into {tablename} ({columns}) values ({values})'.format(
-        tablename=table,
-        columns=', '.join(target_fields),
-        values=values,
-    )
-    row_count = 0
-    row_chunk = []
-    for row in rows:
-        row_chunk.append(row)
-        row_count += 1
-        if row_count % commit_every == 0:
-            cursor.prepare(prepared_stm)
-            cursor.executemany(None, row_chunk)
-            conn.commit()
-            logging.info('[%s] inserted %s rows', table, row_count)
-            row_chunk = []
-    cursor.prepare(prepared_stm)
-    cursor.executemany(None, row_chunk)
-    conn.commit()
-    logging.info('[%s] inserted %s rows', table, row_count)
-    cursor.close()
-    conn.close()
+class CsvToOracle:
+    def __init__(self):
+        self.conn = cx_Oracle.connect(conn_str)
+
+
+    def bulk_insert_rows(self, table, rows, target_fields, commit_every=5000):
+        conn_str = '{user}/{password}@{host}:{port}/{service}'.format(**my_connection)
+        self.conn = cx_Oracle.connect(conn_str)
+        cursor = conn.cursor()
+        values = ', '.join(':%s' % i for i in range(1, len(target_fields) + 1))
+        prepared_stm = 'insert into {tablename} ({columns}) values ({values})'.format(
+            tablename=table,
+            columns=', '.join(target_fields),
+            values=values,
+        )
+        row_count = 0
+        row_chunk = []
+        for row in rows:
+            row_chunk.append(row)
+            row_count += 1
+            if row_count % commit_every == 0:
+                cursor.prepare(prepared_stm)
+                cursor.executemany(None, row_chunk)
+                conn.commit()
+                logging.info('[%s] inserted %s rows', table, row_count)
+                row_chunk = []
+        cursor.prepare(prepared_stm)
+        cursor.executemany(None, row_chunk)
+        conn.commit()
+        logging.info('[%s] inserted %s rows', table, row_count)
+        cursor.close()
+        conn.close()
 
 
 fields = []
@@ -100,10 +105,12 @@ def truncate_table():
     conn.close()
 
 
+transfer = CsvToOracle()
+
 if __name__ == '__main__':
     auto_create_table()
     truncate_table()
     # csv with field description
-    bulk_insert_rows(table=table, rows=reader, target_fields=column_names_with_header)
+    transfer.bulk_insert_rows(table=table, rows=reader, target_fields=column_names_with_header)
     # csv without field description
-    bulk_insert_rows(table=table, rows=reader, target_fields=column_names_without_header)
+    transfer.bulk_insert_rows(table=table, rows=reader, target_fields=column_names_without_header)
