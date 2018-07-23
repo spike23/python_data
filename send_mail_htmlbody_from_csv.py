@@ -15,6 +15,9 @@ filepath = os.path.join(local_filepath,filename)
 
 
 class CsvToEmailSender:
+    """скрипт распаковывает содержимое CSV файла одновременно оборачивая содержимое в HTML теги, после распаковки
+     полученные данные используются для формирования тела письма и отправляются ч/з электронную почту. Параллельно
+     идет запись HTML файла, для возможности проверки содержимого тела письма"""
     def __init__(self, serv, port, usr, passw, filepath):
         self.serv = serv
         self.port = port
