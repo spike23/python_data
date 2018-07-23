@@ -18,53 +18,66 @@ fields_dict = [{'columnName': 'field_1', 'columnType': 'VARCHAR', 'columnLength'
                {'columnName': 'field_8', 'columnType': 'NUMERIC', 'columnLength': '(15, 2)', 'constraint': 'NULL'}]
 
 
-def autocreate_table_iq(driver, server, user, password, schema, tablename, fields_dict):
-    # функция проверяет есть ли таблица на сервере Sybase IQ, если нет - создает
-    try:
-        with closing(pyodbc.connect(driver, server, user, password)) as conn:
-            cursor = conn.cursor()
+class CreatorTable:
+    """создает таблицу на указанном сервере"""
+    def __init__(self, driver, srv, usr, passw, schema, table, fields):
+        self.driver = driver
+        self.srv = srv
+        self.usr = usr
+        self.passw = passw
+        self.schema = schema
+        self.table = table
+        self.fields = fields
+
+    def autocreate_table_iq(self,):
+        # функция проверяет есть ли таблица на сервере Sybase IQ, если нет - создает
+        try:
+            with closing(pyodbc.connect(self.driver, self.srv, self.usr, self.passw)) as conn:
+                cursor = conn.cursor()
 
 
-            # формируем поле для create table
-            fields_str = ''
-            for field in fields_dict:
-                fields_str += ''
-                fields_str += field['columnName']
-                fields_str += ' '
-                fields_str += field['columnType']
-                fields_str += ' '
-                if 'columnLength' in field:
-                    fields_str += field['columnLength']
-                fields_str += ' '
-                fields_str += field['constraint']
-                fields_str += ',\n'
-                if 'columnLength' in field:
-                    fields_str += '({0})'.format(str(field['columnLength'])) \
-                        if isinstance(field['columnLength'], int) else field['columnLength']
-                if 'constraint' in field:
+                # формируем поле для create table
+                fields_str = ''
+                for field in self.fields:
+                    fields_str += ''
+                    fields_str += field['columnName']
+                    fields_str += ' '
+                    fields_str += field['columnType']
+                    fields_str += ' '
+                    if 'columnLength' in field:
+                        fields_str += field['columnLength']
                     fields_str += ' '
                     fields_str += field['constraint']
-                else:
-                    fields_str += ' null'
-                fields_str += ',\n'
+                    fields_str += ',\n'
+                    if 'columnLength' in field:
+                        fields_str += '({0})'.format(str(field['columnLength'])) \
+                            if isinstance(field['columnLength'], int) else field['columnLength']
+                    if 'constraint' in field:
+                        fields_str += ' '
+                        fields_str += field['constraint']
+                    else:
+                        fields_str += ' null'
+                    fields_str += ',\n'
 
-            sql = """IF object_id('{schema}.{tablename}') is null
-                           begin
-                              execute 
-                              (
-                                  'CREATE TABLE {schema}.{tablename}
-                                   ( {fields}
-                                   )'
-                               )
-                           end""".format(schema=schema, tablename=tablename, fields=''.join(fields_str))
+                sql = """IF object_id('{schema}.{tablename}') is null
+                               begin
+                                  execute 
+                                  (
+                                      'CREATE TABLE {schema}.{tablename}
+                                       ( {fields}
+                                       )'
+                                   )
+                               end""".format(schema=self.schema, tablename=self.table, fields=''.join(fields_str))
 
-            cursor.execute(sql)
-            conn.commit()
-    except Exception:
-        print('Creating table {0} ERROR:'.format(tablename))
-        print(sys.exc_info()[1])
-        
+                cursor.execute(sql)
+                conn.commit()
+        except Exception:
+            print('Creating table {0} ERROR:'.format(self.table))
+            print(sys.exc_info()[1])
 
+
+creator = CreatorTable(driver=driver, srv=server, usr=user, passw=password, schema=schema, table=tablename,
+                       fields=fields_dict)
 
 if __name__ == "__main__":
-    autocreate_table_iq(driver, server, user, password, schema, tablename, fields_dict)
+    creator.autocreate_table_iq()

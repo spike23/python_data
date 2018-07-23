@@ -1,7 +1,7 @@
 import pymssql
 import sys
 import re
-from contextlib import closing 
+from contextlib import closing
 
 server = '10.50.120.110:5000'
 another_server = '10.50.120.120:5000'
