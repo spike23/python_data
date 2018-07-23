@@ -13,20 +13,35 @@ password_sftp = "pass"
 username_sftp = "user"
 
 
-def send_to_sftp(host_sftp, port, username_sftp, password_sftp, local_filepath, remote_filepath):
+class SFTPTransfer:
+    """отправляет файл с одного сервера на другой SFTP сервер"""
+    def __init__(self, host, port, usr, passw, from_path, to_path):
+        self.host = host
+        self.port = port
+        self.usr = usr
+        self.passw = passw
+        self.from_path = from_path
+        self.to_path = to_path
+
+
+def send_to_sftp(self,):
     # функция для трансфера файла с одного сервера на другой
     try:
-        transport = paramiko.Transport((host_sftp, port))
-        transport.connect(username=username_sftp, password=password_sftp)
+        transport = paramiko.Transport((self.host, self.port))
+        transport.connect(username=self.usr, password=self.passw)
         sftp = paramiko.SFTPClient.from_transport(transport)
-        sftp.put(local_filepath, remote_filepath)
+        sftp.put(self.from_path, self.to_path)
         sftp.close()
         transport.close()
-        print ('Upload from {0} to {1}was done.'.format(local_filepath, remote_filepath))
+        print ('Upload from {0} to {1}was done.'.format(self.from_path, self.to_path))
     except Exception:
-        print('Transfer from {0} to {1}was interrupt'.format(local_filepath, remote_filepath))
+        print('Transfer from {0} to {1}was interrupt'.format(self.from_path, self.to_path))
         print(sys.exc_info()[1])
 
 
+transfer = SFTPTransfer(host=host_sftp, port=port, usr=username_sftp, passw=password_sftp, from_path=local_filepath,
+                        to_path=remote_filepath)
+
+
 if __name__ == "__main__":
-    send_to_sftp(host_sftp, port, username_sftp, password_sftp, local_filepath, remote_filepath)
+    transfer.send_to_sftp()
