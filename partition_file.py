@@ -43,7 +43,7 @@ class PartitionFiles:
             print("Error while partitioning")
             print(sys.exc_info()[1])
 
-    def partition_file_version_2(self, splitlen, list_of_file):
+    def partition_file_version_2(self,):
         """ функция каждый файл разбивает на новый файл на splitlen количество строк, после вычитки одного файла
             переходит к другому и не открывая новый файл для записи """
         try:
