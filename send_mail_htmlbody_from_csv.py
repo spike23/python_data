@@ -76,4 +76,4 @@ class CsvToEmailSender:
 sender = CsvToEmailSender(serv=server, port=port, usr=user, passw=password, filepath=filepath)
 
 if __name__ == "__main__":
-    sender.send_mail(res=csv_reader())
+    sender.send_mail(res=sender.csv_reader())
