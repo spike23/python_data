@@ -29,6 +29,7 @@ class MsSqlToMsSqlTransfer:
             with closing(pymssql.connect(host=self.srv_from, user=self.usr, password=self.passw, tds_version='4.2',
                                          conn_properties='', charset='cp866')) as connect:
                 with closing(connect.cursor(as_dict=True)) as cursor:
+                    cursor.execute('use {schema}'.format(schema=self.schema))
                     cursor.execute('''select c.name [columnName], t.name [columnType] from sysobjects o
                                     inner join syscolumns c on c.id = o.id
                                     inner join systypes t on t.usertype = c.usertype
@@ -51,8 +52,7 @@ class MsSqlToMsSqlTransfer:
                                          conn_properties='', charset='cp866')) as conn:
                 cursor = conn.cursor(as_dict=True)
                 columns_list = []
-                cols_types = column
-                for item in cols_types:
+                for item in column:
                     # Если поле является датой - переконвертируем его
                     if re.match('date|time', item['columnType']):
                         columns_list.append(
@@ -63,13 +63,14 @@ class MsSqlToMsSqlTransfer:
                 columns_str = ', '.join(columns_list)
 
                 sql = 'select %s from %s' % (columns_str, self.table_from)
+                cursor.execute('use {schema}'.format(schema=self.schema))
                 cursor.execute(sql)
                 rows = cursor.fetchall()
                 cursor.close()
                 conn.commit()
                 conn.close()
-                print('%s', rows)
-                print('%s', cols_types)
+                print('%s' % rows)
+                print('%s' % cols_types)
                 return rows
         except Exception:
             print("Error while getting rows.")
@@ -103,14 +104,14 @@ class MsSqlToMsSqlTransfer:
                         values_str_tmp += '%('
                         values_str_tmp += item['columnName']
                         values_str_tmp += ')'
-                        values_str_tmp += get_data_type(item['columnType'])
+                        values_str_tmp += self.get_data_type(item['columnType'])
                         values_str_tmp += ', '
 
                     values_str = values_str_tmp[:len(values_str_tmp) - 2]
                     columns_str = ', '.join(columns_list)
 
                     prepared_stm = 'INSERT INTO %s (%s) values (%s)' % (self.table_to, columns_str, values_str)
-                    print('%s', prepared_stm)
+                    print('%s' % prepared_stm)
 
                     row_count = 0
                     # разбивка строк
@@ -119,26 +120,30 @@ class MsSqlToMsSqlTransfer:
                         row_chunk.append(row)
                         row_count += 1
                         if row_count % commit_every == 0:
-                            print('%s', row_chunk)
+                            print('%s' % row_chunk)
+                            cursor.execute('use {schema}'.format(schema=self.schema))
                             cursor.executemany(prepared_stm, row_chunk)
                             connect.commit()
-                            print('[%s] inserted %s rows', self.table_to, row_count)
+                            print('In table {table} inserted {count} rows'.format(table=self.table_to, count=row_count))
                             row_chunk = []
+                    cursor.execute('use test')
                     cursor.executemany(prepared_stm, row_chunk)
                     connect.commit()
-                    print('%s', row_chunk)
-                    print('[%s] inserted %s rows', self.table_to, row_count)
+                    print('%s' % row_chunk)
+                    print('In table {table} inserted {count} rows'.format(table=self.table_to, count=row_count))
                     cursor.close()
                     connect.close()
         except Exception:
             print("Error while inserting.")
             print(sys.exc_info()[1])
 
+
 transfer_data = MsSqlToMsSqlTransfer(srv_from=server, srv_to=another_server, usr=user, passw=password,
                                      table_from=mssql_table_from, table_to=mssql_table_to, schema=schema )
 
+
 if __name__ == "__main__":
-    column, cols_types = transfer_data.get_column_types()
+    cols_types = transfer_data.get_column_types()
+    column = transfer_data.get_column_types()
     rows = transfer_data.get_rows(column=column)
     transfer_data.bulk_insert_rows(cols_types=cols_types, rows=rows)
-
