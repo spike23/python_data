@@ -1,9 +1,10 @@
-import pyodbc
+import pymssql
 import os
 import sys
 from contextlib import closing
 from .send_to_sftp import transfer
-driver = '{SQL Server}'
+
+
 server = '192.168.1.1'
 user = 'user'
 password = 'password'
@@ -17,8 +18,7 @@ remote_filepath = os.path.join(remote_path,filename)
 
 class IqLoader:
     """загружает содержимое текстового файла на сервер Sybase IQ"""
-    def __init__(self, driver, srv, usr, passw, schema, table, delimiter, filepath):
-        self.driver = driver
+    def __init__(self, srv, usr, passw, schema, table, delimiter, filepath):
         self.srv = srv
         self.usr = usr
         self.passw = passw
@@ -30,9 +30,9 @@ class IqLoader:
     def load_table_iq(self,):
         # функция для загрузки таблицы на Sybase IQ с текстового файла
         try:
-            with closing(pyodbc.connect(pyodbc.connect(self.driver, self.srv, self.usr, self.passw))) as conn:
+            with closing(pymssql.connect(self.driver, self.srv, self.usr, self.passw)) as conn:
                 cursor = conn.cursor()
-                cursor.execute('select TOP 1 * from {schema}.{table_name}'.format(schema=self.schema,
+                cursor.execute('''select TOP 1 * from {schema}.{table_name}'''.format(schema=self.schema,
                                                                                   table_name=self.table))
                 # получаем название полей для последующего создания prepared_stm
                 columnname = [field[0] for field in cursor.description]
@@ -55,7 +55,7 @@ class IqLoader:
             print(sys.exc_info()[1])
 
 
-loader = IqLoader(driver=driver, srv=server, usr=user, passw=password, schema=schema, table=tablename,
+loader = IqLoader(srv=server, usr=user, passw=password, schema=schema, table=tablename,
                   delimiter=delimiter, filepath=remote_filepath)
 
 if __name__ == "__main__":
