@@ -1,8 +1,8 @@
-import pyodbc
+import pymssql
 import sys
 from contextlib import closing
 
-driver = '{SQL Server}'
+
 server = '192.168.1.1'
 user = 'user'
 password = 'password'
@@ -20,8 +20,7 @@ fields_dict = [{'columnName': 'field_1', 'columnType': 'VARCHAR', 'columnLength'
 
 class CreatorTable:
     """создает таблицу на указанном сервере"""
-    def __init__(self, driver, srv, usr, passw, schema, table, fields):
-        self.driver = driver
+    def __init__(self, srv, usr, passw, schema, table, fields):
         self.srv = srv
         self.usr = usr
         self.passw = passw
@@ -32,10 +31,9 @@ class CreatorTable:
     def autocreate_table_iq(self,):
         # функция проверяет есть ли таблица на сервере Sybase IQ, если нет - создает
         try:
-            with closing(pyodbc.connect(self.driver, self.srv, self.usr, self.passw)) as conn:
+            with closing(pymssql.connect(self.srv, self.usr, self.passw, tds_version='4.2',
+                                          conn_properties='', charset='cp866')) as conn:
                 cursor = conn.cursor()
-
-
                 # формируем поле для create table
                 fields_str = ''
                 for field in self.fields:
@@ -44,11 +42,6 @@ class CreatorTable:
                     fields_str += ' '
                     fields_str += field['columnType']
                     fields_str += ' '
-                    if 'columnLength' in field:
-                        fields_str += field['columnLength']
-                    fields_str += ' '
-                    fields_str += field['constraint']
-                    fields_str += ',\n'
                     if 'columnLength' in field:
                         fields_str += '({0})'.format(str(field['columnLength'])) \
                             if isinstance(field['columnLength'], int) else field['columnLength']
@@ -68,7 +61,7 @@ class CreatorTable:
                                        )'
                                    )
                                end""".format(schema=self.schema, tablename=self.table, fields=''.join(fields_str))
-
+                print(sql)
                 cursor.execute(sql)
                 conn.commit()
         except Exception:
@@ -76,7 +69,7 @@ class CreatorTable:
             print(sys.exc_info()[1])
 
 
-creator = CreatorTable(driver=driver, srv=server, usr=user, passw=password, schema=schema, table=tablename,
+creator = CreatorTable(srv=server, usr=user, passw=password, schema=schema, table=tablename,
                        fields=fields_dict)
 
 if __name__ == "__main__":
