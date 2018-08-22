@@ -1,3 +1,4 @@
+import logging
 import pymssql
 import cx_Oracle
 import re
@@ -20,6 +21,9 @@ mssql_srv = '127.0.0.1:8080'
 mssql_usr = 'user'
 mssql_passw = 'password'
 commit_every = 5000
+
+logging.basicConfig(filename='oracle_to_mssql_transfer.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class OracleToMsSqlTransfer:
@@ -59,6 +63,7 @@ class OracleToMsSqlTransfer:
             cursor.execute(query)
             result = cursor.fetchall()
             print(result)
+            logging.info(result)
             cursor.close()
             connect.commit()
             connect.close()
@@ -104,6 +109,8 @@ class OracleToMsSqlTransfer:
 
         print(rows)
         print("Transfer Microsoft SQL Server query results to oracle")
+        logging.info(rows)
+        logging.info("Transfer Microsoft SQL Server query results to oracle")
         conn_mssql = pymssql.connect(host=self.mssql_srv, user=self.mssql_usr, password=self.mssql_passw,
                                      tds_version='4.2',  conn_properties='', charset='cp866')
         cursor_mssql = conn_mssql.cursor()
@@ -111,6 +118,7 @@ class OracleToMsSqlTransfer:
                                                                                       columns=self.columns(),
                                                                                       values=self.values())
         print(prepared_stm)
+        logging.info(prepared_stm)
         cursor_mssql.execute('use {schema}'.format(schema=self.mssql_schema))
         row_count = 0
         row_chunk = []
@@ -121,11 +129,14 @@ class OracleToMsSqlTransfer:
                 cursor.executemany(prepared_stm, row_chunk)
                 conn.commit()
                 print('{table} inserted {count} rows'.format(table=self.mssql_table, count=row_count))
+                logging.info('{table} inserted {count} rows'.format(table=self.mssql_table, count=row_count))
                 row_chunk = []
         cursor_mssql.executemany(prepared_stm, rows)
         conn_mssql.commit()
         print('{table} inserted {count} rows'.format(table=self.mssql_table, count=row_count))
         print("Transfer is successfully finished!")
+        logging.info('{table} inserted {count} rows'.format(table=self.mssql_table, count=row_count))
+        logging.info("Transfer is successfully finished!")
         cursor_mssql.close()
         conn_mssql.close()
 

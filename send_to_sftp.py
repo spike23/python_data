@@ -1,3 +1,4 @@
+import logging
 import paramiko
 import os
 import sys
@@ -11,6 +12,9 @@ host_sftp = "10.1.186.158"
 port = 22
 password_sftp = "pass"
 username_sftp = "usr"
+
+logging.basicConfig(filename='sftp_transfer.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class SFTPTransfer:
@@ -34,9 +38,12 @@ class SFTPTransfer:
             sftp.close()
             transport.close()
             print('Upload from {0} to {1} was done.'.format(self.from_path, self.to_path))
+            logging.info('Upload from {0} to {1} was done.'.format(self.from_path, self.to_path))
         except Exception:
             print('Transfer from {0} to {1} was interrupt'.format(self.from_path, self.to_path))
             print(sys.exc_info()[1])
+            logging.info('Transfer from {0} to {1} was interrupt'.format(self.from_path, self.to_path))
+            logging.info(sys.exc_info()[1])
 
     def create_remote_directory(self,):
         # функция для создания удаленной директроии на SFTP
@@ -46,9 +53,11 @@ class SFTPTransfer:
         try:
             sftp.chdir(remote_path)
             print('Directory was created early.')
+            logging.info('Directory was created early.')
         except IOError:
             sftp.mkdir(remote_path)
             print('Directory {path} was created'.format(path=self.remote_dir))
+            logging.info('Directory {path} was created'.format(path=self.remote_dir))
         sftp.close()
         transport.close()
 
@@ -62,9 +71,12 @@ class SFTPTransfer:
             sftp.close()
             transport.close()
             print('Source file was removing successfully.')
+            logging.info('Source file was removing successfully.')
         except Exception:
             print('Error while removing source file.')
             print(sys.exc_info()[1])
+            logging.info('Error while removing source file.')
+            logging.info(sys.exc_info()[1])
 
 
 transfer = SFTPTransfer(host=host_sftp, port=port, usr=username_sftp, passw=password_sftp, from_path=local_filepath,

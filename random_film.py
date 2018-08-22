@@ -1,7 +1,11 @@
+import logging
 import random
 
 file_path = "C:\\Users\\admin\\Downloads\\films.txt"
 new_file = "C:\\Users\\admin\\Downloads\\download.txt"
+
+logging.basicConfig(filename='random_choice_film.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class RandomChoiceFilm:
@@ -17,10 +21,12 @@ class RandomChoiceFilm:
         with open(self.film_list, 'r') as my_films, open(self.download_list, 'w') as new:
             reader = my_films.read().split('\n')
             print('List contains ' + str(len(reader)) + ' films.')
+            logging.info('List contains ' + str(len(reader)) + ' films.')
             quantity = int(input("How many films will you watch? "))
             choice = random.sample(reader, quantity)
             result = '\n'.join(choice)
             print(result)
+            logging.info(result)
             # создаем новый список без филмьов, которые указаны для загрузки
             update_list = [x for x in reader if x not in choice]
             new_film_list = '\n'.join(update_list)
@@ -35,6 +41,7 @@ class RandomChoiceFilm:
         with open(self.film_list, 'r') as my_films:
             film_list = my_films.read().split('\n')
             print('New list contains ' + str(len(film_list)) + ' films.')
+            logging.info('New list contains ' + str(len(film_list)) + ' films.')
 
 
 choice_movie = RandomChoiceFilm(film_list=file_path, download_list=new_file)

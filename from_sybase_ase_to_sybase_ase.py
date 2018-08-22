@@ -1,3 +1,4 @@
+import logging
 import pymssql
 import sys
 import re
@@ -10,6 +11,9 @@ password = 'pass'
 mssql_table_from = 'airflow_table'
 mssql_table_to = 'table_airflow'
 schema = 'schema'
+
+logging.basicConfig(filename='mssql_to_mssql_transfer.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class MsSqlToMsSqlTransfer:
@@ -44,6 +48,8 @@ class MsSqlToMsSqlTransfer:
         except Exception:
             print("Error while getting column types.")
             print(sys.exc_info()[1])
+            logging.info("Error while getting column types.")
+            logging.info(sys.exc_info()[1])
 
     def get_rows(self, column):
         """ получаем данные с одной таблицы + конвертируем данные, если присутсвует поле 'date' """
@@ -71,10 +77,14 @@ class MsSqlToMsSqlTransfer:
                 conn.close()
                 print('%s' % rows)
                 print('%s' % cols_types)
+                logging.info('%s' % rows)
+                logging.info('%s' % cols_types)
                 return rows
         except Exception:
             print("Error while getting rows.")
             print(sys.exc_info()[1])
+            logging.info("Error while getting rows.")
+            logging.info(sys.exc_info()[1])
 
     @staticmethod
     def get_data_type(type_name):
@@ -112,6 +122,7 @@ class MsSqlToMsSqlTransfer:
 
                     prepared_stm = 'INSERT INTO %s (%s) values (%s)' % (self.table_to, columns_str, values_str)
                     print('%s' % prepared_stm)
+                    logging.info('%s' % prepared_stm)
 
                     row_count = 0
                     # разбивка строк
@@ -121,21 +132,28 @@ class MsSqlToMsSqlTransfer:
                         row_count += 1
                         if row_count % commit_every == 0:
                             print('%s' % row_chunk)
+                            logging.info('%s' % row_chunk)
                             cursor.execute('use {schema}'.format(schema=self.schema))
                             cursor.executemany(prepared_stm, row_chunk)
                             connect.commit()
                             print('In table {table} inserted {count} rows'.format(table=self.table_to, count=row_count))
+                            logging.info('In table {table} inserted {count} rows'.format(table=self.table_to,
+                                                                                         count=row_count))
                             row_chunk = []
                     cursor.execute('use test')
                     cursor.executemany(prepared_stm, row_chunk)
                     connect.commit()
                     print('%s' % row_chunk)
                     print('In table {table} inserted {count} rows'.format(table=self.table_to, count=row_count))
+                    logging.info('%s' % row_chunk)
+                    logging.info('In table {table} inserted {count} rows'.format(table=self.table_to, count=row_count))
                     cursor.close()
                     connect.close()
         except Exception:
             print("Error while inserting.")
             print(sys.exc_info()[1])
+            logging.info("Error while inserting.")
+            logging.info(sys.exc_info()[1])
 
 
 transfer_data = MsSqlToMsSqlTransfer(srv_from=server, srv_to=another_server, usr=user, passw=password,

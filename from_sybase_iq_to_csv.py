@@ -1,3 +1,4 @@
+import logging
 import os
 import zipfile
 import csv
@@ -14,6 +15,9 @@ local_path = 'C:\\Users\\guest\\folder\\'
 filename = 'test_file.csv'
 local_filepath = os.path.join(local_path,filename)
 sql_query = ''' select * from airflow_table'''
+
+logging.basicConfig(filename='iq_to_csv.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class IqToCsv:
@@ -45,13 +49,16 @@ class IqToCsv:
                     conn.commit()
                     conn.close()
                     print("Dumping finished")
+                    logging.info("Dumping finished")
                 arch = zipfile.ZipFile(os.path.splitext(self.filepath)[0] + '.zip', "w", zipfile.ZIP_DEFLATED)
                 arch.write(self.filepath, os.path.basename(self.filepath))
                 os.remove(self.filepath)
 
         except Exception:
-            print(" Error while writing from database to csv")
+            print("Error while writing from database to csv")
             print(sys.exc_info()[1])
+            logging.info("Error while writing from database to csv")
+            logging.info(sys.exc_info()[1])
 
     @staticmethod
     def chunks(cur):

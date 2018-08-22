@@ -1,3 +1,4 @@
+import logging
 import pymssql
 import sys
 from contextlib import closing
@@ -16,6 +17,9 @@ fields_dict = [{'columnName': 'field_1', 'columnType': 'VARCHAR', 'columnLength'
                {'columnName': 'field_6', 'columnType': 'NUMERIC', 'columnLength': '(15, 2)', 'constraint': 'NULL'},
                {'columnName': 'field_7', 'columnType': 'DATE', 'constraint': 'NULL'},
                {'columnName': 'field_8', 'columnType': 'NUMERIC', 'columnLength': '(15, 2)', 'constraint': 'NULL'}]
+
+logging.basicConfig(filename='creator_table_logs.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class CreatorTable:
@@ -62,11 +66,14 @@ class CreatorTable:
                                    )
                                end""".format(schema=self.schema, tablename=self.table, fields=''.join(fields_str))
                 print(sql)
+                logging.info(sql)
                 cursor.execute(sql)
                 conn.commit()
         except Exception:
             print('Creating table {0} ERROR:'.format(self.table))
             print(sys.exc_info()[1])
+            logging.info('Creating table {0} ERROR:'.format(self.table))
+            logging.info(sys.exc_info()[1])
 
 
 creator = CreatorTable(srv=server, usr=user, passw=password, schema=schema, table=tablename,

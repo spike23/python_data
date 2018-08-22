@@ -1,3 +1,4 @@
+import logging
 import os
 import sys
 
@@ -7,6 +8,9 @@ folder = os.listdir(file_path)
 filter_of_files = filter(lambda x: x.endswith('.txt'), folder)
 list_of_file = [file for file in filter_of_files]
 splitlen = 100
+
+logging.basicConfig(filename='partition_files.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class PartitionFiles:
@@ -37,11 +41,15 @@ class PartitionFiles:
                         dest.write(line)
                         count += 1
                     print(str(count) + " strings in file were writing")
+                    logging.info(str(count) + " strings in file were writing")
             print(str(quontity) + " files were writing")
+            logging.info(str(quontity) + " files were writing")
 
         except Exception:
             print("Error while partitioning")
             print(sys.exc_info()[1])
+            logging.info("Error while partitioning")
+            logging.info(sys.exc_info()[1])
 
     def partition_file_version_2(self,):
         """ функция каждый файл разбивает на новый файл на splitlen количество строк, после вычитки одного файла
@@ -60,15 +68,20 @@ class PartitionFiles:
                             dest = open(os.path.join(file_path,outputname + str(count // self.splitlength) + '.txt'), 'w')
                             quontity += 1
                             print(outputname + str(count // self.splitlength) + '.txt')
+                            logging.info(outputname + str(count // self.splitlength) + '.txt')
                         dest.write(line)
                         count += 1
             print(str(quontity) + " files were writing")
             print(str(count) + " strings in file were writing")
+            logging.info(str(quontity) + " files were writing")
+            logging.info(str(count) + " strings in file were writing")
             if dest:
                 dest.close()
         except Exception:
             print("Error while partitioning")
             print(sys.exc_info()[1])
+            logging.info("Error while partitioning")
+            logging.info(sys.exc_info()[1])
 
 
 partition = PartitionFiles(filepath=file_path, splitlength=splitlen, filelist=list_of_file)

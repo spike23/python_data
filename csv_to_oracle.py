@@ -23,6 +23,9 @@ my_connection = {
 }
 conn_str = '{user}/{password}@{host}:{port}/{service}'.format(**my_connection)
 
+logging.basicConfig(filename='csv_to_oracle.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
+
 
 class CsvToOracle:
     """опционально создает/очищает таблицу на сервере и загружает данные с текстового файла на сервер"""
@@ -60,12 +63,15 @@ class CsvToOracle:
                 cursor.executemany(None, row_chunk)
                 conn.commit()
                 print('[%s] inserted %s rows', self.table, row_count)
+                logging.info('[%s] inserted %s rows', self.table, row_count)
                 row_chunk = []
         print(row_chunk)
+        logging.info(row_chunk)
         cursor.prepare(prepared_stm)
         cursor.executemany(None, row_chunk)
         conn.commit()
         print('[%s] inserted %s rows', self.table, row_count)
+        logging.info('[%s] inserted %s rows', self.table, row_count)
         cursor.close()
         conn.close()
 

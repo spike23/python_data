@@ -1,3 +1,4 @@
+import logging
 import smtplib
 import os
 import sys
@@ -12,6 +13,9 @@ password = 'pass'
 filename = 'test_file.csv'
 local_filepath = "C:\\Users\\admin\\Downloads\\"
 filepath = os.path.join(local_filepath,filename)
+
+logging.basicConfig(filename='csv_to_email_sender.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class CsvToEmailSender:
@@ -40,6 +44,8 @@ class CsvToEmailSender:
         except Exception:
             print("Error while creating html file from csv.")
             print(sys.exc_info()[1])
+            logging.info("Error while creating html file from csv.")
+            logging.info(sys.exc_info()[1])
 
     def send_mail(self, res):
         # отправка письма с прикреплнным содержимым (результат работы функции csv_reader)
@@ -71,6 +77,8 @@ class CsvToEmailSender:
         except Exception:
             print("Error while sending mail.")
             print(sys.exc_info()[1])
+            logging.info("Error while sending mail.")
+            logging.info(sys.exc_info()[1])
 
 
 sender = CsvToEmailSender(serv=server, port=port, usr=user, passw=password, filepath=filepath)

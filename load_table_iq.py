@@ -1,3 +1,4 @@
+import logging
 import pymssql
 import os
 import sys
@@ -14,6 +15,9 @@ delimiter = '|'
 remote_path = 'C:\\Users\\admin\\Downloads\\'
 filename = 'test_file.csv'
 remote_filepath = os.path.join(remote_path,filename)
+
+logging.basicConfig(filename='iq_loader.log', level=logging.INFO, format='%(asctime)s %(message)s',
+                    datefmt='%Y-%m-%d %H:%M:%S')
 
 
 class IqLoader:
@@ -53,6 +57,8 @@ class IqLoader:
         except Exception:
             print('Load table {0} ERROR:'.format(self.table))
             print(sys.exc_info()[1])
+            logging.info('Load table {0} ERROR:'.format(self.table))
+            logging.info(sys.exc_info()[1])
 
 
 loader = IqLoader(srv=server, usr=user, passw=password, schema=schema, table=tablename,
