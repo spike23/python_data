@@ -59,5 +59,7 @@ loader = IqLoader(srv=server, usr=user, passw=password, schema=schema, table=tab
                   delimiter=delimiter, filepath=remote_filepath)
 
 if __name__ == "__main__":
+    transfer.create_remote_directory()
     transfer.send_to_sftp()
     loader.load_table_iq()
+    transfer.remove_source_file()
