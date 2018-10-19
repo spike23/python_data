@@ -15,6 +15,7 @@ logging.basicConfig(filename='csv_file_sorter.log', level=logging.INFO, format='
 
 
 class CsvSortFile:
+    """запись новго файла с отсортированными данными"""
     def __init__(self, old, new):
         self.old = old
         self.new = new
@@ -27,7 +28,9 @@ class CsvSortFile:
             new_file_count = 0
             for line in csv_reader:
                 old_file_count += 1
+                #  проверка полей на наличие содержимых значений
                 if 'REPLENISHMENT' in line[1] or 'WITHDRAWAL' in line[1]:
+                    #  запись определнных полей
                     csv_writer.writerow([line[0], line[2]])
                     new_file_count += 1
             logging.info("Old file has {old_count} rows".format(old_count=old_file_count))
